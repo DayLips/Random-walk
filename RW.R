@@ -1,4 +1,4 @@
-N = 5 #Количество узлов в сетке
+N = 10 #Количество узлов в сетке
 grid = matrix(nrow = N, ncol = N, 1:(N^2), byrow = TRUE)
 finish = c(3, 3) #Конечный узел
 prob_matrix = function(n) {
@@ -11,8 +11,8 @@ prob_matrix = function(n) {
       left = j - 1
       directions = c(up, right, down, left)
       count_val = sample(sum(directions > 0), 1)
-      rand_val = rnorm(count_val)
-      prob = abs(rand_val)/sum(abs(rand_val))
+      rand_val = runif(count_val) # Используем равномерное распределение
+      prob = rand_val / sum(rand_val) # Нормализуем
       k = 1
       if(up > 0 && up <= n && k <= count_val) {
         P[grid[i, j], grid[up, j]] = prob[k]
@@ -47,11 +47,13 @@ rand_walk = function(start_pos, p_matr, fin_pos) {
     col_prob_trans = which.max(p_matr[grid[knot[1], knot[2]],])
     next_knot = which(grid == col_prob_trans, arr.ind = TRUE)
     prev_knot = knot
+    p_matr[grid[knot[1], knot[2]], col_prob_trans] = p_matr[grid[knot[1], knot[2]], col_prob_trans]/2
+    p_matr[col_prob_trans, grid[knot[1], knot[2]]] = p_matr[col_prob_trans, grid[knot[1], knot[2]]]/2
     knot = next_knot
     path = rbind(path, knot)
     k = k + 1
     if(knot[1] == fin_pos[1] && knot[2] == fin_pos[2]) break;
-    if(k == (N^2)) break;
+    #if(k == (N^2)) break;
   }
   return(path)
 }
@@ -94,6 +96,7 @@ pole = function(p_matr, start_pos = c(1,1)) {
     points(finish[1], finish[2], col = "magenta", pch = 19, cex = 2)
     grid(col = 1)
   }
+  return(res)
 }
 
 # Функция для отображении гистограммы, в параметре указывается матрица переходов probability_matrix
@@ -115,9 +118,11 @@ histogram_directions = function(p_matr) {
       }
     }
   }
-  hist(counts, breaks = N^2, col = "lightblue", xlab = "Кол-во попыток", ylab = "Частота")
+  hist(counts, breaks = N, col = "lightblue", xlab = "Кол-во попыток", ylab = "Частота")
   return(counts)
 }
 
-all_pole(probability_matrix)
+#all_pole(probability_matrix)
 histogram_directions(probability_matrix)
+#res = pole(probability_matrix, c(1,1))
+
